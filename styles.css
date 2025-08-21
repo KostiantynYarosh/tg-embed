@@ -1,0 +1,614 @@
+/* ============================ 0. TOKENS ============================ */
+
+:root{
+  --bg:#080d14;
+  --panel:#0e1621;
+  --text:#eaeef3;
+  --muted:#99a6b5;
+  --bord:#1b25366c;
+  --accent:#53a8ff;
+  --bubble:#182633;
+  --quote:#5daede;
+  --code-color: #5c819e;
+  --pre-header: #2b435b;
+  --pre-body: #0c0f14;
+  --q-body: #21384a;
+  --shortcuts: #142031;
+  --send-button-shadow: rgba(255, 255, 255, 0.25);
+}
+
+[data-theme="light"]{
+  --bg:#edf2f7;
+  --panel:#ffffff;
+  --text:#0b1220;
+  --muted:#66788a;
+  --bord:#d7dee6;
+  --accent:#1f7ae0;
+  --bubble:#ffffff;
+  --quote:#2e96d3;
+  --code-color: #5c809c;
+  --pre-header: #b4cbdd;
+  --pre-body: #cde3f0;
+  --q-body: #e4f1f9;
+  --shortcuts: #ffffff;
+  --send-button-shadow: rgb(0, 0, 0, 0.25);
+}
+
+
+/* ======================== 1. BASE AND RESET ======================== */
+
+*{ box-sizing:border-box; }
+
+html, body{
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:Inter,system-ui,Segoe UI,Roboto,Arial;
+  background:var(--bg);
+  color:var(--text);
+}
+
+
+b, strong {
+  font-weight: 500;
+}
+
+/* ============================ 2. HEADER ============================ */
+
+header{
+  position:sticky;
+  top:0;
+  z-index:100;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:10px;
+  margin-top:5px;
+  padding:12px 20px;
+  background:var(--panel);
+  border-bottom:1px solid var(--bord);
+}
+
+.logo{
+  width:33px;
+  height:33px;
+  margin-top:-9px;
+}
+
+.title{
+  font-weight:600;
+  margin-top:-12px;
+  margin-left:4px;
+}
+
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-left:auto;
+}
+
+.iconBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:36px;
+  height:36px;
+  border:1px solid var(--bord);
+  border-radius:10px;
+  background:var(--panel);
+  color:var(--text);
+  cursor:pointer;
+}
+.iconBtn:hover{ background:rgba(255,255,255,.06); }
+.iconBtn.active{ outline:2px solid var(--text); outline-offset:2px; }
+.iconBtn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+
+/* ====================== 3. THEME TOGGLE BUTTON ===================== */
+
+.themeToggle{
+  position:fixed;
+  top:72px;
+  right:18px;
+  z-index:40;
+  padding:8px 12px;
+  border:1px solid var(--bord);
+  border-radius:12px;
+  background:var(--panel);
+  color:var(--text);
+  cursor:pointer;
+}
+.themeToggle:hover{ opacity:.95; }
+.themeToggle:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+
+/* ============================ 4. LAYOUT ============================ */
+
+main{
+  display:grid;
+  grid-template-columns:80px 1.3fr 1.5fr 280px;
+  gap:16px;
+  max-width:1600px;
+  margin:auto;
+  padding:20px;
+}
+
+
+/* =========================== 5. TOOL RAIL ========================== */
+
+.rail{
+  position:relative;
+  left:25px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:54px;
+  height:54px;
+  font-weight:700;
+  color:var(--text);
+  background:var(--panel);
+  border:1px solid var(--bord);
+  border-radius:16px;
+  cursor:pointer;
+}
+.btn:hover{ background-color:rgba(255,255,255,.05); }
+.btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+.rail_spacer{ flex:1; }
+
+
+/* ============================ 6. PANELS ============================ */
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--bord);
+  border-radius:18px;
+}
+
+.editor{ padding:0; }
+
+.editor_ta{
+  width:100%;
+  min-height:220px;
+  padding:16px;
+  background:transparent;
+  color:var(--text);
+  font-size:13px;
+  line-height:1.6;
+  border:0;
+  outline:0;
+  resize:none;
+  overflow-y:hidden;
+  transition:height .15s ease;
+}
+
+.preview{ padding:16px; }
+
+.preview_wrap{
+  padding:20px;
+  border:1px solid var(--bord);
+  border-radius:18px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
+
+
+/* ========================= 7. CHAT PREVIEW ========================= */
+
+.chat{ max-width:560px; margin:auto; }
+.row{ display:flex; gap:12px; }
+.avatar{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:40px;
+  height:40px;
+  font-weight:700;
+  color:var(--bg);
+  background:var(--text);
+  border-radius:999px;
+}
+.body{ flex:1; }
+.meta{ font-size:13px; color:var(--muted); }
+
+.bubble{
+  font-size: 15.75px;
+  margin-top:8px;
+  padding:12px 16px;
+  background:var(--bubble);
+  border:1px solid var(--bord);
+  border-radius:14px;
+  box-shadow:0 1px 0 rgba(0,0,0,.2);
+  overflow-wrap: anywhere;
+  hyphens: manual;
+}
+
+.bubble a{
+  color:#4e9cec;
+  text-decoration:none;
+
+}
+.bubble a:hover{ text-decoration:underline; }
+.bubble a:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+.hint{
+  margin-top:-11px;
+  font-size:12px;
+  text-align:center;
+  color:var(--muted);
+}
+
+
+/* ============================ 8. QUOTES ============================ */
+
+.q{
+  margin: 3px 0;
+  position: relative;
+  padding: 4px 50px 4px 10px;   /* изначально 50px */
+  background: var(--q-body);
+  border-radius: 5px;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.q.tight {
+  padding-right: 20px; /* когда текст дошёл до края */
+}
+
+
+.q::before{
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
+  content:"";
+  position:absolute;
+  left:0;
+  top:0px;
+  bottom:0px;
+  width:4px;
+  background:var(--quote);
+}
+.q::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 10px;       /* size you want inside bubble */
+  height: 10px;
+
+  background: var(--quote); 
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50' fill='none'><path d='M10.8281 5C4.0648 5 -0.180015 10.5666 0.00586653 17.2288C0.00783007 17.2991 0.0181341 17.3711 0.0357069 17.4393C1.54616 23.2991 5.33348 24.8877 8.96277 27.0111C11.6225 28.5671 12.9809 31.6182 9.14789 37.1992C7.46688 39.6469 9.39882 43.4135 12.115 42.214C14.6278 41.1043 16.7218 39.4397 19.1562 36.5634C22.566 31.963 23.135 26.3461 23.1393 17.3351C23.1393 10.5226 17.6274 5 10.8281 5Z' fill='white'/><path d='M37.6888 5C30.9255 5 26.6807 10.5666 26.8666 17.2288C26.8686 17.2991 26.8789 17.3711 26.8964 17.4393C28.4069 23.2991 32.1942 24.8877 35.8235 27.0111C38.4832 28.5671 39.8417 31.6182 36.0086 37.1992C34.3276 39.6469 36.2596 43.4135 38.9758 42.214C41.4886 41.1043 43.5826 39.4397 46.017 36.5634C49.4267 31.963 49.9957 26.3461 50 17.3351C50 10.5226 44.4881 5 37.6888 5Z' fill='white'/></svg>") no-repeat center / contain;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50' fill='none'><path d='M10.8281 5C4.0648 5 -0.180015 10.5666 0.00586653 17.2288C0.00783007 17.2991 0.0181341 17.3711 0.0357069 17.4393C1.54616 23.2991 5.33348 24.8877 8.96277 27.0111C11.6225 28.5671 12.9809 31.6182 9.14789 37.1992C7.46688 39.6469 9.39882 43.4135 12.115 42.214C14.6278 41.1043 16.7218 39.4397 19.1562 36.5634C22.566 31.963 23.135 26.3461 23.1393 17.3351C23.1393 10.5226 17.6274 5 10.8281 5Z' fill='white'/><path d='M37.6888 5C30.9255 5 26.6807 10.5666 26.8666 17.2288C26.8686 17.2991 26.8789 17.3711 26.8964 17.4393C28.4069 23.2991 32.1942 24.8877 35.8235 27.0111C38.4832 28.5671 39.8417 31.6182 36.0086 37.1992C34.3276 39.6469 36.2596 43.4135 38.9758 42.214C41.4886 41.1043 43.5826 39.4397 46.017 36.5634C49.4267 31.963 49.9957 26.3461 50 17.3351C50 10.5226 44.4881 5 37.6888 5Z' fill='white'/></svg>") no-repeat center / contain;
+}
+
+
+
+
+
+/* ========================= 9. CODE STYLES ========================== */
+code, .pre-pre, kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+code {
+  color: var(--code-color);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.pre-pre { 
+  box-sizing: border-box;
+  display: flex; 
+  flex-direction: column; 
+  position: relative; 
+  border-radius: 5px; 
+  width: fit-content;        /* ширина только по контенту */
+  margin: 3px 0; 
+  color: var(--code-color); 
+
+}
+
+
+.pre-pre::before{
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
+  content:"";
+  position:absolute;
+  left:0; top:0; bottom:0;
+  width:4px;
+  background:var(--code-color);
+}
+
+/* заголовок */
+.pre-header {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 7px 2px 10px;
+  background: var(--pre-header);
+}
+
+
+/* тело кода */
+.pre-pre code {
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  display: block;
+  padding: 4px 12px;
+  padding-right: 50px;    
+  background: var(--pre-body);
+  white-space: pre-wrap;
+}
+
+.pre-pre code.tight {
+  padding-right: 10px; 
+}
+
+.pre-copy {
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+/* =========================== 10. SPOILERS ========================== */
+
+
+/* контейнер спойлера: не влияем на высоту строки */
+.sp {
+  position: relative;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.sp .sp-text {
+  user-select: none;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  transition: -webkit-text-fill-color .2s ease, color .2s ease;
+}
+
+.sp.reveal .sp-text{
+  user-select: text;
+  margin: 0;
+  padding: 0;
+  color: inherit;
+  -webkit-text-fill-color: currentColor;
+}
+
+
+.sp-canvas{
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+
+/* =========================send-button=============================== */
+
+
+.send-button {
+  
+  margin-top: 12px;
+  text-align: right;
+}
+
+.send-button .b.primary {
+  font-weight: 700;
+  padding-right: 5px;
+  background-color: #00000000;
+  border:2px solid var(--text);
+  color: var(--text);
+  transition:background-color .2s, border .2s, color .2s ease;
+  box-shadow: 0 0 5px var(--send-button-shadow);
+}
+
+.send-button .b.primary:hover{
+  background-color: #6eb2ff50;
+}
+
+.send-button .b.primary:active{
+  background-color: #489aff50;
+  color: var(--send-button);
+}
+
+
+
+.send-button button {
+  display: inline-flex;
+  gap: 8px; 
+}
+
+
+
+
+.send-button button svg {
+  transform: translateY(-1px); 
+}
+
+
+/* ============================ 11. MODAL ============================ */
+
+.modal{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.35);
+  z-index:50;
+  opacity:0;
+  transition:opacity .2s ease;
+}
+.hidden{ display:none; }
+.modal:not(.hidden){ opacity:1; }
+
+.dlg{
+  width:360px;
+  max-width:92vw;
+  background:var(--panel);
+  border:1px solid var(--bord);
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+  transform:translateY(6px);
+  opacity:0;
+  transition:transform .2s ease, opacity .2s ease, background-color .25s ease, border-color .25s ease;
+}
+.modal:not(.hidden) .dlg{
+  transform:translateY(0);
+  opacity:1;
+}
+
+.dlg_head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 12px;
+  border-bottom:1px solid var(--bord);
+}
+.dlg_title{ font-weight:600; }
+.dlg_close{
+  background:transparent;
+  border:0;
+  color:var(--muted);
+  font-size:20px;
+  cursor:pointer;
+}
+
+.dlg_body{
+  display:grid;
+  gap:10px;
+  padding:12px;
+}
+
+.field span{
+  display:block;
+  margin-bottom:4px;
+  font-size:12px;
+  color:var(--muted);
+}
+.field input{
+  width:100%;
+  padding:10px;
+  color:var(--text);
+  background:var(--panel);
+  border:1px solid var(--bord);
+  border-radius:10px;
+}
+
+.dlg_actions{
+  display:flex;
+  gap:8px;
+  justify-content:flex-end;
+  padding:10px 12px;
+  border-top:1px solid var(--bord);
+}
+
+.b{
+  padding:10px 14px;
+  border:1px solid var(--bord);
+  border-radius:10px;
+  cursor:pointer;
+}
+.b.primary{
+  color:#fff;
+  background:var(--accent);
+  border-color:transparent;
+}
+.b.ghost{
+  color:var(--text);
+  background:var(--panel);
+}
+.b:hover{ opacity:.95; }
+.b:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+
+/* =========================== 12. SHORTCUTS ========================= */
+
+.shortcuts{ padding:12px; }
+
+.shortcuts__title{
+  margin-bottom:8px;
+  font-weight:600;
+}
+
+.shortcuts__list{
+  display:grid;
+  gap:6px;
+  margin:0;
+  padding:0;
+  list-style:none;
+  font-size:14px;
+  color:var(--muted);
+}
+
+.shortcuts__list li{ color:var(--text); }
+
+.shortcuts kbd{
+  font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12px;
+  padding:2px 6px;
+  color:var(--text);
+  background:var(--shortcuts);
+  border:1px solid var(--bord);
+  border-bottom-width:2px;
+  border-radius:6px;
+}
+
+
+/* ======================= 13. THEME TRANSITIONS ===================== */
+
+body, header, .panel, .btn, .iconBtn, .bubble, .preview_wrap, .rail,
+.editor_ta, .dlg, .modal, pre, .q, .field input, .shortcuts, .avatar,
+.hint, .meta, .bubble a{
+  transition:
+    background-color .25s ease,
+    color .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease;
+}
+
+
+/* ============================ 14. QUERIES ========================== */
+
+@media (max-width:1024px){
+  main{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  .rail{
+    position:sticky;
+    top:0;
+    left:0;
+    flex-direction:row;
+    padding:8px;
+    background:var(--bg);
+    border:1px solid var(--bord);
+    border-radius:14px;
+  }
+  .themeToggle{ top:auto; bottom:18px; }
+}
+
+
+/* ====================== 15. REDUCED MOTION MODE ==================== */
+
+@media (prefers-reduced-motion:reduce){
+  *{ transition:none !important; animation:none !important; }
+}
