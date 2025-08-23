@@ -334,6 +334,8 @@ btnLight?.addEventListener('click', ()=> setTheme('light'));
 btnDark ?.addEventListener('click', ()=> setTheme('dark'));
 updateThemeIcons();
 
+
+
 // spoiler reveal
 // out.addEventListener('click', (e)=>{ if(e.target.classList.contains('sp')) e.target.classList.toggle('reveal'); });
 out.addEventListener('click', (e)=>{
@@ -416,53 +418,225 @@ out.addEventListener('click', e=>{
   }
 });
 
-const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
-function getPayload(){
-  return { text: ed.value.trim() || "" };
-}
 
-function sendToBot(){
-  const payload = JSON.stringify(getPayload());
-  if (tg) tg.sendData(payload);
-  else alert(payload); // fallback вне Telegram
-}
 
-const sendBtn = document.getElementById('sendBtn');
-// проверяем авторизацию
-if (tg){
-  tg.ready();
-  tg.expand();
+//======================emoji
+// ===== Emoji Picker, full Unicode =====
+const bEmoji = document.getElementById('bEmoji');
+const emojiPortal = document.getElementById('emojiPortal');
 
-  const user = tg.initDataUnsafe?.user;
-  if (user){
-    // если есть данные о пользователе — показываем кнопку
-    tg.MainButton.setText('Отправить в бота');
-    tg.MainButton.onClick(sendToBot);
-    tg.MainButton.show();
-    tg.enableClosingConfirmation();
+let EMOJI_CACHE = null;
+let emojiMenuEl = null;
 
-    if (sendBtn){
-      sendBtn.style.display = 'inline-block';
-      sendBtn.addEventListener('click', sendToBot);
-    }
-  } else {
-    // если нет user — скрываем кнопку
-    if (sendBtn) sendBtn.style.display = 'none';
+async function loadAllEmoji(){
+  if (EMOJI_CACHE) return EMOJI_CACHE;
+
+  const key = 'emoji_json_v151_dedup';
+  const cached = localStorage.getItem(key);
+  if (cached){
+    EMOJI_CACHE = JSON.parse(cached);
+    return EMOJI_CACHE;
   }
-} else {
-  // вне Telegram просто показываем кнопку для тестов
-  const sendBtnWrap = document.getElementById('sendBtnWrap');
 
-  if (user){
-    if (sendBtnWrap){
-      sendBtnWrap.style.display = 'block';   // показываем обёртку
-      sendBtn.addEventListener('click', sendToBot);
-    }
-  } else {
-    if (sendBtnWrap){
-      sendBtnWrap.style.display = 'none';    // полностью убираем
+  // Публічний список емодзі Unicode
+  const res = await fetch('https://unpkg.com/emoji.json@15.1/emoji.json');
+  const data = await res.json(); // [{char, name, codes, category, group, subgroup, keywords}, ...]
+
+  // Дедуп за символом, щоб не було варіантів зі шкірою як дублікати
+  const map = new Map();
+  for (const e of data){
+    const ch = e.char;
+    if (!map.has(ch)){
+      map.set(ch, {
+        char: ch,
+        name: e.name || '',
+        group: e.group || e.category || 'Other',
+        keywords: (e.keywords || []).join(' ').toLowerCase()
+      });
     }
   }
-  
+  EMOJI_CACHE = Array.from(map.values());
+
+  localStorage.setItem(key, JSON.stringify(EMOJI_CACHE));
+  return EMOJI_CACHE;
 }
+
+function closeEmojiMenu(){
+  if(emojiMenuEl){
+    emojiMenuEl.remove();
+    emojiMenuEl = null;
+  }
+}
+
+function clamp(val, min, max){ return Math.max(min, Math.min(max, val)); }
+
+async function openEmojiMenu(anchorEl){
+  closeEmojiMenu();
+
+  emojiMenuEl = document.createElement('div');
+  emojiMenuEl.className = 'emoji-menu';
+  emojiMenuEl.innerHTML = `
+    <div class="emoji-head">
+      <input id="emojiSearch" class="emoji-search" placeholder="Search">
+    </div>
+    <div class="emoji-body">
+      <div class="emoji-tabs" id="emojiTabs" style="display:flex;gap:6px;flex-wrap:wrap;margin:0 4px 6px 4px"></div>
+      <div class="emoji-grid" id="emojiGrid"></div>
+    </div>
+  `;
+  document.body.appendChild(emojiMenuEl);
+
+  // позиціонування біля кнопки з утриманням у вікні
+  const r = anchorEl.getBoundingClientRect();
+  const menuW = 340;
+  const left = clamp(r.left, 8, window.innerWidth - menuW - 8);
+  emojiMenuEl.style.left = left + 'px';
+  emojiMenuEl.style.top  = (r.bottom + 8) + 'px';
+
+  // завантаження списку
+  let all = [];
+  try { all = await loadAllEmoji(); }
+  catch { all = []; }
+
+  // категорії
+  const order = [
+    'Smileys & Emotion',
+    'People & Body',
+    'Animals & Nature',
+    'Food & Drink',
+    'Activities',
+    'Travel & Places',
+    'Objects',
+    'Symbols',
+    'Flags',
+    'Other'
+  ];
+  const groups = Array.from(new Set(all.map(e=>e.group)));
+  const tabs = order.filter(g=>groups.includes(g)).concat(groups.filter(g=>!order.includes(g)));
+
+  const tabsEl = emojiMenuEl.querySelector('#emojiTabs');
+  const grid = emojiMenuEl.querySelector('#emojiGrid');
+  const input = emojiMenuEl.querySelector('#emojiSearch');
+
+  let currentList = all;
+  let visible = [];
+  let chunk = 400;    // скільки показувати за один раз
+  let loaded = 0;
+  let activeGroup = 'All';
+
+  // малюємо вкладки
+  const mkBtn = (txt)=> {
+    const b = document.createElement('button');
+    b.className = 'emoji-tab';
+    b.textContent = txt;
+    b.style.padding = '4px 8px';
+    b.style.border = '1px solid var(--bord)';
+    b.style.borderRadius = '10px';
+    b.style.background = 'var(--panel)';
+    b.style.cursor = 'pointer';
+    b.onclick = ()=>{
+      activeGroup = txt;
+      input.value = '';
+      filterAndRender();
+      tabsEl.querySelectorAll('.emoji-tab').forEach(el=> el.style.outline = '');
+      b.style.outline = '2px solid var(--accent)';
+      b.style.outlineOffset = '2px';
+    };
+    return b;
+  };
+
+  tabsEl.appendChild(mkBtn('All'));
+  tabs.forEach(g=> tabsEl.appendChild(mkBtn(g)));
+  // активна перша
+  tabsEl.querySelector('.emoji-tab').click();
+
+  function renderChunk(reset=false){
+    if (reset){
+      grid.innerHTML = '';
+      loaded = 0;
+    }
+    const slice = visible.slice(loaded, loaded + chunk);
+    if (!slice.length) return;
+
+    const frag = document.createDocumentFragment();
+    for (const e of slice){
+      const d = document.createElement('div');
+      d.className = 'emoji-item';
+      d.title = e.name;
+      d.textContent = e.char;
+      frag.appendChild(d);
+    }
+    grid.appendChild(frag);
+    loaded += slice.length;
+  }
+
+  function filterAndRender(){
+    const q = input.value.trim().toLowerCase();
+    const base = activeGroup === 'All' ? all : all.filter(e=> e.group === activeGroup);
+    visible = q
+      ? base.filter(e => e.name.toLowerCase().includes(q) || e.keywords.includes(q))
+      : base;
+
+    renderChunk(true);
+  }
+
+  filterAndRender();
+
+  // інфініт скрол
+  const body = emojiMenuEl.querySelector('.emoji-body');
+  body.addEventListener('scroll', ()=>{
+    const near = body.scrollTop + body.clientHeight >= body.scrollHeight - 200;
+    if (near) renderChunk();
+  });
+
+  // пошук з дебаунсом
+  let t = 0;
+  input.addEventListener('input', ()=>{
+    clearTimeout(t);
+    t = setTimeout(filterAndRender, 150);
+  });
+
+  // вставка у текст
+  emojiMenuEl.addEventListener('click', (e)=>{
+    const it = e.target.closest('.emoji-item');
+    if(!it) return;
+    const ch = it.textContent;
+    const s = ed.selectionStart;
+    const before = ed.value.slice(0, s);
+    const after  = ed.value.slice(ed.selectionEnd);
+    ed.value = before + ch + after;
+    const pos = s + ch.length;
+    ed.setSelectionRange(pos, pos);
+    saveSnapshot();
+    renderAll();
+    closeEmojiMenu();
+  });
+
+  // закриття по кліку поза меню і ресайз
+  setTimeout(()=>{
+    const onDoc = (ev)=>{
+      if(!emojiMenuEl || emojiMenuEl.contains(ev.target) || ev.target === anchorEl) return;
+      closeEmojiMenu();
+      document.removeEventListener('mousedown', onDoc);
+      window.removeEventListener('resize', onDoc);
+      window.removeEventListener('scroll', onDoc, true);
+    };
+    document.addEventListener('mousedown', onDoc);
+    window.addEventListener('resize', onDoc);
+    window.addEventListener('scroll', onDoc, true);
+  },0);
+}
+
+bEmoji?.addEventListener('click', (e)=> openEmojiMenu(e.currentTarget));
+
+
+//======================emoji
+
+
+
+
+
+
+
+
