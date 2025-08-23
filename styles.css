@@ -34,7 +34,17 @@
   --send-button-shadow: rgb(0, 0, 0, 0.25);
 }
 
-
+@media (prefers-color-scheme: light){
+  :root:not([data-theme]){
+    --bg:#edf2f7; --panel:#ffffff; --text:#0b1220; --muted:#66788a; --bord:#d7dee6;
+    --accent:#1f7ae0; --bubble:#ffffff; --quote:#1f7ae0; --code-color: #5c809c;
+  --pre-header: #b4cbdd;
+  --pre-body: #cde3f0;
+  --q-body: #e4f1f9;
+  --shortcuts: #ffffff;
+  --send-button-shadow: rgb(0, 0, 0, 0.25);
+  }
+}
 /* ======================== 1. BASE AND RESET ======================== */
 
 *{ box-sizing:border-box; }
@@ -78,9 +88,10 @@ header{
 }
 
 .title{
-  font-weight:600;
-  margin-top:-12px;
+  font-weight:500;
   margin-left:4px;
+  font-size: large;
+  font-family:ui-monospace,Menlo,Consolas,monospace;
 }
 
 .header-actions{
@@ -160,10 +171,14 @@ main{
   border-radius:16px;
   cursor:pointer;
 }
+
 .btn:hover{ background-color:rgba(255,255,255,.05); }
 .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
 
 .rail_spacer{ flex:1; }
+
+
+
 
 
 /* ============================ 6. PANELS ============================ */
@@ -571,6 +586,112 @@ code {
   border-bottom-width:2px;
   border-radius:6px;
 }
+
+
+
+/* ======================= emoji menu ===================== */
+
+
+
+.emoji-menu{
+  position:absolute;
+  z-index:70;
+  width:340px;
+  max-height:420px;
+  background:var(--panel);
+  border:1px solid var(--bord);
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  padding:10px;
+  overflow:hidden;
+}
+
+.emoji-head{
+  display:flex;
+  gap:8px;
+  margin-bottom:8px;
+}
+
+.emoji-search{
+  flex:1;
+  height:34px;
+  padding:0 10px;
+  border:1px solid var(--bord);
+  border-radius:10px;
+  background:var(--panel);
+  color:var(--text);
+}
+
+.emoji-body{
+  max-height:360px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-right:6px;
+  scrollbar-width:thin;
+  scrollbar-color: var(--accent) transparent;
+}
+
+.emoji-body::-webkit-scrollbar{ width:10px; }
+.emoji-body::-webkit-scrollbar-thumb{
+  background:var(--accent);
+  border-radius:8px;
+}
+.emoji-body::-webkit-scrollbar-track{
+  background:transparent;
+}
+
+.emoji-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(34px, 1fr));
+  gap:6px;
+  min-width:0;
+  padding:4px;
+  box-sizing:border-box;
+}
+
+.emoji-item{
+  width:34px;
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  border-radius:8px;
+  font-size:22px;
+  font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",system-ui,sans-serif;
+}
+
+.emoji-item:hover{ background:rgba(255,255,255,.06); }
+.emoji-item:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+.emoji-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:0 4px 8px 4px;
+}
+
+.emoji-tab{
+  margin-top: 10px;
+  padding:4px 10px;
+  border:1px solid var(--bord);
+  border-radius:10px;
+  background:var(--panel);
+  color:var(--text);
+  font-size:13px;
+  cursor:pointer;
+  transition:background .15s, color .15s, border .15s;
+}
+
+.emoji-tab:hover{ background:rgba(255,255,255,.06); }
+.emoji-tab.active{
+  border-color:var(--accent);
+  color:var(--accent);
+  font-weight:500;
+}
+
+
+
 
 
 /* ======================= 13. THEME TRANSITIONS ===================== */
